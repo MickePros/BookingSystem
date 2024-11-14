@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookingSystem.Data;
 using BookingSystem.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookingSystem.Controllers
 {
     public class GymClassesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private UserManager<ApplicationUser> _userManager;
 
-        public GymClassesController(ApplicationDbContext context)
+        public GymClassesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: GymClasses
@@ -34,13 +37,27 @@ namespace BookingSystem.Controllers
             }
 
             var gymClass = await _context.GymClass
+                .Include(m => m.Members)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (gymClass == null)
             {
                 return NotFound();
             }
 
-            return View(gymClass);
+            var detailsData = new List<string>();
+            foreach (var member in gymClass.Members)
+            {
+                var user = await _userManager.FindByIdAsync(member.ApplicationUserId);
+                detailsData.Add(user.Email);
+            }
+
+            var details = new DetailsGymClassViewModel
+            {
+                gymClass = gymClass,
+                detailsData = detailsData
+            };
+
+            return View(details);
         }
 
         // GET: GymClasses/Create
@@ -152,6 +169,33 @@ namespace BookingSystem.Controllers
         private bool GymClassExists(int id)
         {
             return _context.GymClass.Any(e => e.Id == id);
+        }
+
+        public async Task<IActionResult> BookingToggle(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var user = await _userManager.GetUserAsync(User);
+            var uid = user.Id;
+
+            var gymClass = _context.GymClass.Include(g => g.Members).FirstOrDefault(g => g.Id == id);
+            var signup = gymClass.Members.FirstOrDefault(m => m.ApplicationUserId == uid);
+
+            if (signup == null)
+            {
+                gymClass.Members.Add(new ApplicationUserGymClass
+                {
+                    ApplicationUserId = uid,
+                    GymClassId = (int)id
+                });
+            }
+            else
+            {
+                gymClass.Members.Remove(signup);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

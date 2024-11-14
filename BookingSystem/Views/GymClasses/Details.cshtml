@@ -1,4 +1,4 @@
-﻿@model BookingSystem.Models.GymClass
+﻿@model BookingSystem.Models.DetailsGymClassViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -11,32 +11,41 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.DisplayNameFor(model => Model.gymClass.Name)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
+            @Html.DisplayFor(model => Model.gymClass.Name)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartTime)
+            @Html.DisplayNameFor(model => Model.gymClass.StartTime)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartTime)
+            @Html.DisplayFor(model => Model.gymClass.StartTime)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Duration)
+            @Html.DisplayNameFor(model => Model.gymClass.Duration)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Duration)
+            @Html.DisplayFor(model => Model.gymClass.Duration)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
+            @Html.DisplayNameFor(model => Model.gymClass.Description)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
+            @Html.DisplayFor(model => Model.gymClass.Description)
+        </dd>
+        <dt class="col-sm-2">
+            Signups
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var item in Model.detailsData)
+            {
+                <p>@Html.DisplayFor(modelitem => item)</p>
+            }
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.gymClass?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
